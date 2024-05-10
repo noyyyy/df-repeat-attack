@@ -175,12 +175,18 @@ const c = {
 
 // A recurring attack
 
-function pester(
+function sleep(milliseconds) {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+
+async function pester(
   yourPlanetLocationId,
   opponentsPlanetLocationsId,
   percentageTrigger = 65,
   percentageSend = 20
 ) {
+  await sleep(300);
+
   const source = df.getPlanetWithId(yourPlanetLocationId);
   if (!source) {
     console.error(`[pester] Unable to get planet: ${yourPlanetLocationId}`);
@@ -822,7 +828,7 @@ class Manager {
       this.storeActions();
     }
     this.rehydrate();
-    this.intervalId = setInterval(this.coreLoop.bind(this), 15000);
+    this.intervalId = setInterval(this.coreLoop.bind(this), 120000);
     window.__SELDON_CORELOOP__.push(this.intervalId);
     //aliases
     this.p = this.createPester.bind(this);
@@ -906,7 +912,7 @@ class Manager {
       try {
         switch (action.type) {
           case c.PESTER:
-            pester(
+            await pester(
               action.payload.srcId,
               action.payload.syncId,
               action.payload.percentageTrigger,
@@ -914,7 +920,7 @@ class Manager {
             );
             break;
           case c.FEED:
-            pester(
+            await pester(
               action.payload.srcId,
               action.payload.syncId,
               action.payload.percentageTrigger,
@@ -1093,7 +1099,7 @@ class Manager {
     clearInterval(this.intervalId);
   }
   restart() {
-    this.intervalId = setInterval(this.coreLoop.bind(this), 30000);
+    this.intervalId = setInterval(this.coreLoop.bind(this), 120000);
     window.__SELDON_CORELOOP__.push(this.intervalId);
     this.dead = false;
   }
